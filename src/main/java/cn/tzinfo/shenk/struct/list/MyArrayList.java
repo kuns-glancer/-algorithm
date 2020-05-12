@@ -76,14 +76,15 @@ public class MyArrayList<T> implements List<T> {
     }
 
     public boolean add(int idx, T t) {
+        if(idx < 0 || idx > size - 1) {
+            throw new IndexOutOfBoundsException();
+        }
+        modCount++;
         if(elements == null) {
             elements = new Object[DEFAULT_CAPACITY];
         }
         if(elements.length == size) {
             ensureCapacity(size << 1 + 1);
-        }
-        if(idx > size + 1) {
-            idx = size;
         }
         for(int i=size;i>idx;i--) {
             elements[i] = elements[i-1];
@@ -115,9 +116,10 @@ public class MyArrayList<T> implements List<T> {
     }
 
     public T remove(int idx) {
-        if(idx >= size()) {
+        if(idx < 0 || idx >= size()) {
             throw new IndexOutOfBoundsException();
         }
+        modCount++;
         T t = (T) elements[idx];
         for(int i = idx; i<size-1;i++) {
             elements[i] = elements[i+1];
@@ -129,6 +131,7 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public void clear() {
+        modCount++;
         for(int i=0; i<size; i++) {
             elements[i] = null;
         }
@@ -190,16 +193,4 @@ public class MyArrayList<T> implements List<T> {
         }
     }
 
-    public static void main(String[] args) {
-        MyArrayList<Integer> myArrayList = new MyArrayList<>();
-        for(int i=0;i<10;i++) {
-            myArrayList.add(i);
-        }
-        Iterator<Integer> iterator = myArrayList.iterator();
-        while(iterator.hasNext()) {
-            iterator.next();
-            iterator.remove();
-        }
-        System.out.println(myArrayList.size());
-    }
 }

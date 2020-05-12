@@ -21,5 +21,5 @@ public interface List<T> {
 
     void clear();
 
-    Iterator iterator();
+    Iterator<T> iterator();
 }
