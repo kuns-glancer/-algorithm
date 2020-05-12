@@ -13,7 +13,7 @@ public interface List<T> {
 
     boolean isEmpty();
 
-    boolean contains(T t);
+    boolean contains(Object obj);
 
     boolean add(T t);
 

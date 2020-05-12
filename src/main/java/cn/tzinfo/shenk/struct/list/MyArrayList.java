@@ -1,5 +1,6 @@
 package cn.tzinfo.shenk.struct.list;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 /**
@@ -12,6 +13,8 @@ public class MyArrayList<T> implements List<T> {
     static final int DEFAULT_CAPACITY = 10;
 
     int size = 0;
+
+    transient int modCount = 0;
 
     Object[] elements;
 
@@ -26,8 +29,29 @@ public class MyArrayList<T> implements List<T> {
     }
 
     @Override
-    public boolean contains(T t) {
-        return false;
+    public boolean contains(Object obj) {
+        return indexOf(obj) > -1;
+    }
+
+    public int indexOf(Object obj) {
+        return indexRangeOf(obj, 0, size);
+    }
+
+    public int indexRangeOf(Object obj, int start, int end) {
+        if(obj == null) {
+            for(int i=start;i<end;i++) {
+                if(elements[i] == null) {
+                    return i;
+                }
+            }
+        }else {
+            for(int i=start;i<end;i++) {
+                if(obj.equals(elements[i])) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     public T set(int idx, T t) {
@@ -127,6 +151,10 @@ public class MyArrayList<T> implements List<T> {
 
         int cursor;
 
+        int expectedModCount = modCount;
+
+        int lastIdx = -1;
+
         @Override
         public boolean hasNext() {
             return cursor != size;
@@ -134,18 +162,44 @@ public class MyArrayList<T> implements List<T> {
 
         @Override
         public T next() {
-            return (T) elements[cursor++];
+
+            checkForComodification();
+            int i = cursor;
+            cursor = i+1;
+            return (T) elements[lastIdx = i];
         }
 
         @Override
         public void remove() {
-            MyArrayList.this.remove(cursor);
+            if (lastIdx < 0)
+                throw new IllegalStateException();
+            checkForComodification();
+            try {
+                MyArrayList.this.remove(lastIdx);
+                expectedModCount = modCount;
+                cursor = lastIdx;
+                lastIdx = -1;
+            }catch (IndexOutOfBoundsException e) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        final void checkForComodification() {
+            if (modCount != expectedModCount)
+                throw new ConcurrentModificationException();
         }
     }
 
     public static void main(String[] args) {
         MyArrayList<Integer> myArrayList = new MyArrayList<>();
-        myArrayList.add(0);
-        myArrayList.remove(0);
+        for(int i=0;i<10;i++) {
+            myArrayList.add(i);
+        }
+        Iterator<Integer> iterator = myArrayList.iterator();
+        while(iterator.hasNext()) {
+            iterator.next();
+            iterator.remove();
+        }
+        System.out.println(myArrayList.size());
     }
 }
