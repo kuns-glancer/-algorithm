@@ -6,4 +6,14 @@ package cn.tzinfo.shenk.algorithm.sort;
  * @Description: 堆排序
  */
 public class HeapSort {
+
+    boolean isMaxHeap;
+
+    public HeapSort() {
+        this(false);
+    }
+
+    public HeapSort(boolean isMaxHeap) {
+        this.isMaxHeap = isMaxHeap;
+    }
 }
